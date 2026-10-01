@@ -1,5 +1,6 @@
 import { Card, Text, Group, Badge, Button, Stack, Box } from '@mantine/core';
-import { type Book, getLoansCount, getMaxLoansCount, getOpenReservationsForBook, getPickupPointById } from '../../mock/data';
+import type { Book } from '../../mock/data';
+import { getLoansCount, getMaxLoansCount, getOpenReservationsForBook, getPickupPointById } from '../../mock/data';
 import { LoansBar } from '../ui/LoansBar';
 
 interface BookCardProps {
@@ -28,19 +29,27 @@ export function BookCard({ book, onEdit, onRemove, onCancelReservation }: BookCa
       style={{
         backgroundColor: '#FBF7EE',
         borderColor: '#D9CDB4',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 300,
       }}
     >
-      <Stack gap="sm">
+      <Stack gap="sm" style={{ flex: 1 }}>
         <Box>
-          <Text fw={700} size="lg" style={{ fontFamily: '"PT Serif", Georgia, serif' }}>
+          <Text
+            fw={700}
+            size="lg"
+            style={{ fontFamily: '"PT Serif", Georgia, serif' }}
+            lineClamp={2}
+          >
             {book.title}
           </Text>
-          <Text c="dimmed" size="sm">
+          <Text c="dimmed" size="sm" lineClamp={1}>
             {book.author}
           </Text>
         </Box>
 
-        <Text size="xs" c="dimmed">
+        <Text size="xs" c="dimmed" lineClamp={2}>
           {meta}
         </Text>
 
@@ -72,40 +81,40 @@ export function BookCard({ book, onEdit, onRemove, onCancelReservation }: BookCa
           </Text>
         </Group>
 
-        <Text size="xs" c="dimmed">
+        <Text size="xs" c="dimmed" lineClamp={2}>
           Точки выдачи:{' '}
           {book.pickup_point_ids
             .map((id) => getPickupPointById(id)?.name)
             .filter(Boolean)
             .join(', ')}
         </Text>
+      </Stack>
 
-        <Group gap="xs" mt="xs">
-          <Button variant="light" color="gold" size="xs" onClick={() => onEdit(book)}>
-            Редактировать
-          </Button>
+      <Group gap="xs" mt="md" wrap="wrap">
+        <Button variant="light" color="gold" size="xs" onClick={() => onEdit(book)}>
+          Редактировать
+        </Button>
+        <Button
+          variant="light"
+          color="bordeaux"
+          size="xs"
+          leftSection={hasActive ? '🔒' : undefined}
+          disabled={hasActive}
+          onClick={() => onRemove(book)}
+        >
+          Изъять
+        </Button>
+        {hasReserved.length > 0 && onCancelReservation && (
           <Button
-            variant="light"
+            variant="subtle"
             color="bordeaux"
             size="xs"
-            leftSection={hasActive ? '🔒' : undefined}
-            disabled={hasActive}
-            onClick={() => onRemove(book)}
+            onClick={() => onCancelReservation(book.id)}
           >
-            Изъять
+            Отменить бронь
           </Button>
-          {hasReserved.length > 0 && onCancelReservation && (
-            <Button
-              variant="subtle"
-              color="bordeaux"
-              size="xs"
-              onClick={() => onCancelReservation(book.id)}
-            >
-              Отменить бронь
-            </Button>
-          )}
-        </Group>
-      </Stack>
+        )}
+      </Group>
     </Card>
   );
 }

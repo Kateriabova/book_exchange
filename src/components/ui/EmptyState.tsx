@@ -5,7 +5,7 @@ interface EmptyStateProps {
   icon?: string;
 }
 
-export function EmptyState({ message, icon = '📚' }: EmptyStateProps) {
+export function EmptyState({ message, icon = '🕯️' }: EmptyStateProps) {
   return (
     <Box
       style={{

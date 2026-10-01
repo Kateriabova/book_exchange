@@ -1,32 +1,37 @@
-# React + TypeScript + Vite
+# Сервис обмена книгами
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+## 1. Назначение приложения
 
-Currently, two official plugins are available:
+Сервис позволяет пользователям вести учёт домашней библиотеки, выдавать свои книги другим людям и бронировать чужие книги на определённые даты. 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**Основные возможности:**
+*   Ведение личной библиотеки (добавление, редактирование, изъятие книг).
+*   Настройка правил выдачи (срок бронирования, доступные точки выдачи).
+*   Каталог книг с фильтрацией и сортировкой.
+*   Бронирование книг с выбором дат и места получения.
+*   Просмотр статистики и истории броней.
 
-## React Compiler
+## 2. Пользовательские сценарии
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1.  **Авторизация:** Вход и регистрация (без восстановления пароля).
+2.  **Ведение библиотеки:** Добавление книги, указание её параметров и правил выдачи.
+3.  **Бронирование:** Поиск книги в каталоге, выбор даты начала и срока, выбор точки выдачи.
+4.  **Управление бронями:** Отмена брони, подтверждение возврата книги.
+5.  **Просмотр статистики:** Количество книг, активных выдач и общее число броней.
 
-## Expanding the Oxlint configuration
+## 3. Основные экраны
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+Навигация осуществляется через верхнюю шапку приложения. Неавторизованные пользователи перенаправляются на страницу входа.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+1.  **`/auth` — Авторизация.** Табы «Вход» и «Регистрация». Поля: логин, пароль.
+2.  **`/catalog` — Каталог книг.** Фильтры (поиск, сортировка, «только доступные»), список книг с кнопкой «Забронировать».
+3.  **`/library` — Мои книги.** Сайдбар со статистикой, поиск, карточки книг с кнопками «Редактировать», «Изъять», «Отменить бронь».
+4.  **`/reservations` — Мои брони.** Табы «Активные» и «История». Таблица с действиями («Отменить», «Вернуть»).
+5.  **`/profile` — Профиль.** Имя, логин, статистика, кнопка «Выйти».
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+**Модальные окна:**
+*   Бронирование книги (выбор точки, календарь с занятыми датами, выбор срока).
+*   Добавление/редактирование книги (поля книги + правила выдачи владельца).
+
+## 4. Запуск приложения
+    npm run dev

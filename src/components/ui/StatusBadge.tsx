@@ -1,6 +1,6 @@
 import { Badge } from '@mantine/core';
 import dayjs from 'dayjs';
-import { type Reservation, type ReservationStatus } from '../../mock/data';
+import type { ReservationStatus } from '../../mock/data';
 
 interface StatusBadgeProps {
   status: ReservationStatus;

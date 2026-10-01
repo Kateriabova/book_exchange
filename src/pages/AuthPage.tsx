@@ -63,7 +63,7 @@ export function AuthPage() {
               Сервис обмена книгами
             </Title>
             <Text c="dimmed" size="sm" mt="xs">
-              Обменивайтесь книгами с единомышленниками
+              Обмен книгами между студентами
             </Text>
           </Box>
 

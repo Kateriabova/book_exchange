@@ -37,7 +37,7 @@ export function MyReservationsPage() {
           order={2}
           style={{ fontFamily: '"PT Serif", Georgia, serif', color: '#2E2418' }}
         >
-          Мои брони
+          📜 Мои брони
         </Title>
 
         <StatsStrip

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Box,
   Title,
@@ -7,6 +8,8 @@ import {
   Button,
   Divider,
   Group,
+  PasswordInput,
+  Alert,
 } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -30,8 +33,41 @@ export function ProfilePage() {
   const reserved = getMyReserved();
   const returned = getMyReturned();
 
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
+
   const handleLogout = () => {
     navigate('/auth');
+  };
+
+  const handleChangePassword = () => {
+    setPasswordMessage(null);
+
+    if (!oldPassword || !newPassword || !newPasswordConfirm) {
+      setPasswordMessage({ type: 'error', text: 'Заполните все поля' });
+      return;
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+      setPasswordMessage({ type: 'error', text: 'Новые пароли не совпадают' });
+      return;
+    }
+
+    if (newPassword.length < 4) {
+      setPasswordMessage({ type: 'error', text: 'Пароль слишком короткий (минимум 4 символа)' });
+      return;
+    }
+
+    // Демо: принимаем любой старый пароль
+    setPasswordMessage({ type: 'success', text: 'Пароль успешно изменён ✨' });
+    setOldPassword('');
+    setNewPassword('');
+    setNewPasswordConfirm('');
   };
 
   return (
@@ -74,9 +110,9 @@ export function ProfilePage() {
               </Text>
               <StatsStrip
                 items={[
-                  { label: 'Книг моих', value: myBooks.length },
+                  { label: 'Моих книг', value: myBooks.length },
                   { label: 'На руках у других', value: lentOut, color: 'bordeaux' },
-                  { label: 'Броней всего', value: totalLoans, color: 'sage' },
+                  { label: 'Общее количество броней', value: totalLoans, color: 'sage' },
                 ]}
               />
             </Box>
@@ -85,15 +121,58 @@ export function ProfilePage() {
 
             <Box>
               <Text fw={600} mb="sm" size="sm">
-                Мои чтения
+                История обмена
               </Text>
               <StatsStrip
                 items={[
                   { label: 'Сейчас на руках', value: activeLoans.length, color: 'bordeaux' },
-                  { label: 'Зарезервировано', value: reserved.length, color: 'gold' },
+                  { label: 'В ожидании', value: reserved.length, color: 'gold' },
                   { label: 'Прочитано', value: returned.length, color: 'sage' },
                 ]}
               />
+            </Box>
+
+            <Divider />
+
+            <Box>
+              <Text fw={600} mb="sm" size="sm">
+                Сменить пароль
+              </Text>
+              <Stack gap="sm">
+                <PasswordInput
+                  label="Старый пароль"
+                  placeholder="Введите текущий пароль"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.currentTarget.value)}
+                />
+                <PasswordInput
+                  label="Новый пароль"
+                  placeholder="Введите новый пароль"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.currentTarget.value)}
+                />
+                <PasswordInput
+                  label="Повторите новый пароль"
+                  placeholder="Повторите новый пароль"
+                  value={newPasswordConfirm}
+                  onChange={(e) => setNewPasswordConfirm(e.currentTarget.value)}
+                />
+                {passwordMessage && (
+                  <Alert
+                    color={passwordMessage.type === 'success' ? 'sage' : 'bordeaux'}
+                    variant="light"
+                  >
+                    {passwordMessage.text}
+                  </Alert>
+                )}
+                <Button
+                  color="gold"
+                  onClick={handleChangePassword}
+                  disabled={!oldPassword || !newPassword || !newPasswordConfirm}
+                >
+                  Сменить пароль
+                </Button>
+              </Stack>
             </Box>
 
             <Divider />

@@ -11,8 +11,8 @@ import {
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import dayjs from 'dayjs';
+import type { Book } from '../../mock/data';
 import {
-  type Book,
   getPickupPointById,
   getOccupiedDates,
   currentUser,
@@ -22,7 +22,7 @@ interface ReserveModalProps {
   opened: boolean;
   onClose: () => void;
   book: Book | null;
-  onReserve: ( data: {
+  onReserve: (data: {
     book_id: number;
     borrower_id: number;
     pickup_point_id: number;
@@ -108,7 +108,7 @@ export function ReserveModal({ opened, onClose, book, onReserve }: ReserveModalP
           onChange={setPickupPointId}
           required
         />
-        
+
         <DatePickerInput
           label="Дата начала"
           placeholder="Выберите дату"

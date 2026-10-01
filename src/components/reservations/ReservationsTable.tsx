@@ -6,8 +6,8 @@ import {
   Box,
   Tabs,
 } from '@mantine/core';
+import type { Reservation } from '../../mock/data';
 import {
-  type Reservation,
   getBookById,
   getUserById,
   getPickupPointById,

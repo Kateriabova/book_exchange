@@ -8,9 +8,9 @@ import {
   Stack,
   Group,
 } from '@mantine/core';
+import type { Book } from '../mock/data';
 import {
   books,
-  type Book,
   isBookAvailableToday,
 } from '../mock/data';
 import { BookRow } from '../components/books/BookRow';
@@ -64,35 +64,37 @@ export function CatalogPage() {
           Каталог книг
         </Title>
 
-        <Group gap="md" wrap="wrap" align="flex-end">
+        <Stack gap="sm">
           <TextInput
             label="Поиск"
             placeholder="По названию или автору..."
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
-            style={{ flex: 1, minWidth: 200 }}
           />
-          <Select
-            label="Сортировка"
-            value={sort}
-            onChange={(v) => setSort((v as SortOption) || 'loans')}
-            data={[
-              { value: 'loans', label: 'По популярности' },
-              { value: 'title', label: 'По названию' },
-              { value: 'year', label: 'По году' },
-            ]}
-            style={{ width: 200 }}
-          />
-          <Checkbox
-            label="Только доступные сейчас"
-            checked={onlyAvailable}
-            onChange={(e) => setOnlyAvailable(e.currentTarget.checked)}
-            color="gold"
-          />
-        </Group>
+          <Group gap="md" wrap="wrap" align="flex-end">
+            <Select
+              label="Сортировка"
+              value={sort}
+              onChange={(v) => setSort((v as SortOption) || 'loans')}
+              data={[
+                { value: 'loans', label: 'По популярности' },
+                { value: 'title', label: 'По названию' },
+                { value: 'author', label: 'По автору' },
+                { value: 'year', label: 'По году издания' },
+              ]}
+              style={{ minWidth: 180 }}
+            />
+            <Checkbox
+              label="Только свободные сейчас"
+              checked={onlyAvailable}
+              onChange={(e) => setOnlyAvailable(e.currentTarget.checked)}
+              color="gold"
+            />
+          </Group>
+        </Stack>
 
         {filteredBooks.length === 0 ? (
-          <EmptyState message="Ничего не найдено" icon="🔍" />
+          <EmptyState message="Ничего не найдено" icon="📜" />
         ) : (
           <Stack gap="sm">
             {filteredBooks.map((book) => (
