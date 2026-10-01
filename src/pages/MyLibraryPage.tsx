@@ -16,7 +16,7 @@ import {
   getMyBooksLentOut,
   getMyBooksTotalLoans,
   currentUser,
-  Book,
+  type Book,
 } from '../mock/data';
 import { BookCard } from '../components/books/BookCard';
 import { BookFormModal } from '../components/books/BookFormModal';
@@ -52,7 +52,7 @@ export function MyLibraryPage() {
     // Демо: ничего не делаем
   };
 
-  const handleSave = (_ any) => {
+  const handleSave = () => {
     // Демо: просто закрываем форму
     setFormOpened(false);
     setEditingBook(null);

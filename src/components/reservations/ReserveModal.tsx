@@ -12,7 +12,7 @@ import {
 import { DatePickerInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import {
-  Book,
+  type Book,
   getPickupPointById,
   getOccupiedDates,
   currentUser,
@@ -22,7 +22,7 @@ interface ReserveModalProps {
   opened: boolean;
   onClose: () => void;
   book: Book | null;
-  onReserve: ( {
+  onReserve: ( data: {
     book_id: number;
     borrower_id: number;
     pickup_point_id: number;
@@ -108,12 +108,15 @@ export function ReserveModal({ opened, onClose, book, onReserve }: ReserveModalP
           onChange={setPickupPointId}
           required
         />
-
+        
         <DatePickerInput
           label="Дата начала"
           placeholder="Выберите дату"
           value={startDate}
-          onChange={setStartDate}
+          onChange={(date) => {
+            // date приходит как string | null, конвертируем в Date | null
+            setStartDate(date ? new Date(date) : null);
+          }}
           minDate={new Date()}
           excludeDate={(date) => occupiedDates.includes(dayjs(date).format('YYYY-MM-DD'))}
           required

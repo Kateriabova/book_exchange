@@ -11,7 +11,8 @@ import {
   Text,
   Divider,
 } from '@mantine/core';
-import { Book, GENRES, pickupPoints } from '../../mock/data';
+import type { Book } from '../../mock/data';
+import { GENRES, pickupPoints } from '../../mock/data';
 
 interface BookFormModalProps {
   opened: boolean;

@@ -1,6 +1,6 @@
 import { Group, Text, Button, Box, Stack } from '@mantine/core';
+import type { Book } from '../../mock/data';
 import {
-  Book,
   getUserById,
   getLoansCount,
   getMaxLoansCount,
@@ -37,8 +37,8 @@ export function BookRow({ book, onReserve }: BookRowProps) {
         borderRadius: 6,
       }}
     >
-      <Group justify="space-between" align="flex-start" wrap="nowrap">
-        <Stack gap={4} style={{ flex: 1 }}>
+      <Stack gap="sm">
+        <Stack gap={4}>
           <Text fw={700} size="lg" style={{ fontFamily: '"PT Serif", Georgia, serif' }}>
             {book.title}
           </Text>
@@ -65,10 +65,19 @@ export function BookRow({ book, onReserve }: BookRowProps) {
             />
           </Group>
         </Stack>
-        <Button color="gold" variant="filled" size="sm" onClick={() => onReserve(book)}>
-          Забронировать
-        </Button>
-      </Group>
+        <Box>
+          <Button
+            color="gold"
+            variant="filled"
+            size="sm"
+            fullWidth
+            onClick={() => onReserve(book)}
+            style={{ maxWidth: 200 }}
+          >
+            Забронировать
+          </Button>
+        </Box>
+      </Stack>
     </Box>
   );
 }

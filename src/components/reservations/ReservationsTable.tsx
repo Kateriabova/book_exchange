@@ -7,7 +7,7 @@ import {
   Tabs,
 } from '@mantine/core';
 import {
-  Reservation,
+  type Reservation,
   getBookById,
   getUserById,
   getPickupPointById,

@@ -10,7 +10,7 @@ import {
 } from '@mantine/core';
 import {
   books,
-  Book,
+  type Book,
   isBookAvailableToday,
 } from '../mock/data';
 import { BookRow } from '../components/books/BookRow';

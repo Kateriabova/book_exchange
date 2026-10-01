@@ -1,5 +1,5 @@
 import { Card, Text, Group, Badge, Button, Stack, Box } from '@mantine/core';
-import { Book, getLoansCount, getMaxLoansCount, getOpenReservationsForBook, getPickupPointById } from '../../mock/data';
+import { type Book, getLoansCount, getMaxLoansCount, getOpenReservationsForBook, getPickupPointById } from '../../mock/data';
 import { LoansBar } from '../ui/LoansBar';
 
 interface BookCardProps {
