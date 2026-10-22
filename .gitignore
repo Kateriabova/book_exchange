@@ -1,4 +1,42 @@
-# Logs
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+*.egg-info/
+*.egg
+build/
+dist/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+.DS_Store
+Thumbs.db
+
+.env
+.env.local
+.env.*.local
+*.secret
+
 logs
 *.log
 npm-debug.log*
@@ -7,18 +45,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+node_modules/
+dist/
+dist-ssr/
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+!.gitkeep

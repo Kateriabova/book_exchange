@@ -2,7 +2,7 @@
 
 ## 1. Назначение приложения
 
-Сервис позволяет пользователям вести учёт домашней библиотеки, выдавать свои книги другим людям и бронировать чужие книги на определённые даты. 
+Сервис позволяет пользователям вести учёт домашней библиотеки, выдавать свои книги другим людям и бронировать чужие книги на определённые даты.
 
 **Основные возможности:**
 *   Ведение личной библиотеки (добавление, редактирование, изъятие книг).
@@ -33,5 +33,56 @@
 *   Бронирование книги (выбор точки, календарь с занятыми датами, выбор срока).
 *   Добавление/редактирование книги (поля книги + правила выдачи владельца).
 
-## 4. Запуск приложения
-    npm run dev
+## 4. Модель данных
+
+База данных — PostgreSQL. Скрипт создания находится в `docs/scripts/db_create.sql`.
+
+### Сущности
+
+**`users`** — пользователи (владельцы и получатели книг)
+*   `id` (PK), `login` (unique), `password_hash`, `display_name`, `created_at`, `updated_at`
+
+**`pickup_points`** — пункты выдачи книг
+*   `id` (PK), `name` (unique), `created_at`
+
+**`books`** — книги в библиотеках пользователей
+*   `id` (PK), `owner_id` (FK → `users.id` ON DELETE CASCADE), `title`, `author`, `publisher`, `year`, `pages`, `language`, `genre` (ENUM), `max_loan_days`, `created_at`, `updated_at`
+
+**`reservations`** — брони книг
+*   `id` (PK), `book_id` (FK → `books.id` ON DELETE CASCADE), `borrower_id` (FK → `users.id` ON DELETE CASCADE), `pickup_point_id` (FK → `pickup_points.id`), `start_date`, `due_date`, `status` (ENUM: `reserved`, `active`, `returned`, `cancelled`), `created_at`, `updated_at`
+
+**`book_pickup_points`** — связующая таблица M:N между книгами и точками выдачи
+*   `book_id` (FK → `books.id` ON DELETE CASCADE), `pickup_point_id` (FK → `pickup_points.id` ON DELETE CASCADE) — составной PK
+
+### Связи
+*   `users` 1:N `books` (один пользователь — много книг)
+*   `users` 1:N `reservations` (один пользователь — много броней как получатель)
+*   `books` 1:N `reservations` (одна книга — много броней)
+*   `pickup_points` 1:N `reservations` (одна точка — много броней)
+*   `books` M:N `pickup_points` (книга может выдаваться в нескольких точках)
+
+## 5. API
+
+Backend реализован на FastAPI. Swagger-документация доступна по адресу `/docs`.
+
+**Группы контроллеров:**
+*   **Пользователи** (`/users`) — регистрация, получение профиля, смена имени и пароля.
+*   **Книги** (`/books`) — добавление, поиск в каталоге, библиотека пользователя, детали и редактирование.
+*   **Бронирования** (`/reservations`) — создание, просмотр активных/прошедших/всех броней, брони на свои книги, обновление и смена статуса.
+*   **Пункты выдачи** (`/pickup-points`) — создание, список и редактирование пунктов.
+
+## 6. Запуск приложения
+
+### Frontend
+```bash
+cd frontend
+npm run dev
+```
+### Backend
+Подготовить базу данных, выполнив скрипт docs/scripts/db_create.sql.
+Перейти в папку backend/app.
+```bash
+python main.py
+```
+Сервер будет доступен по адресу http://localhost:8000, Swagger — http://localhost:8000/docs.
+
