@@ -1,4 +1,5 @@
-import { Card, Text, Group, Badge, Button, Stack, Box } from '@mantine/core';
+import { Card, Text, Group, Badge, Button, Stack, Box, Tooltip, useMantineTheme } from '@mantine/core';
+import { IconLock, IconEdit, IconTrash } from '@tabler/icons-react';
 import type { Book } from '../../mock/data';
 import { getLoansCount, getMaxLoansCount, getOpenReservationsForBook, getPickupPointById } from '../../mock/data';
 import { LoansBar } from '../ui/LoansBar';
@@ -11,6 +12,7 @@ interface BookCardProps {
 }
 
 export function BookCard({ book, onEdit, onRemove, onCancelReservation }: BookCardProps) {
+  const theme = useMantineTheme();
   const loansCount = getLoansCount(book.id);
   const maxCount = getMaxLoansCount();
   const openReservations = getOpenReservationsForBook(book.id);
@@ -27,11 +29,16 @@ export function BookCard({ book, onEdit, onRemove, onCancelReservation }: BookCa
       padding="md"
       withBorder
       style={{
-        backgroundColor: '#FBF7EE',
-        borderColor: '#D9CDB4',
+        backgroundColor: theme.other.card,
+        borderColor: theme.other.border,
         display: 'flex',
         flexDirection: 'column',
         minHeight: 300,
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        ':hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: theme.shadows.md,
+        },
       }}
     >
       <Stack gap="sm" style={{ flex: 1 }}>
@@ -39,7 +46,7 @@ export function BookCard({ book, onEdit, onRemove, onCancelReservation }: BookCa
           <Text
             fw={700}
             size="lg"
-            style={{ fontFamily: '"PT Serif", Georgia, serif' }}
+            style={{ fontFamily: theme.headings.fontFamily }}
             lineClamp={2}
           >
             {book.title}
@@ -91,19 +98,33 @@ export function BookCard({ book, onEdit, onRemove, onCancelReservation }: BookCa
       </Stack>
 
       <Group gap="xs" mt="md" wrap="wrap">
-        <Button variant="light" color="gold" size="xs" onClick={() => onEdit(book)}>
-          Редактировать
-        </Button>
         <Button
           variant="light"
-          color="bordeaux"
+          color="gold"
           size="xs"
-          leftSection={hasActive ? '🔒' : undefined}
-          disabled={hasActive}
-          onClick={() => onRemove(book)}
+          leftSection={<IconEdit size={14} />}
+          onClick={() => onEdit(book)}
         >
-          Изъять
+          Редактировать
         </Button>
+        <Tooltip
+          label={hasActive ? 'Нельзя изъять: есть активная бронь' : 'Изъять книгу'}
+          disabled={!hasActive}
+          withArrow
+        >
+          <Box>
+            <Button
+              variant="light"
+              color="bordeaux"
+              size="xs"
+              leftSection={hasActive ? <IconLock size={14} /> : <IconTrash size={14} />}
+              disabled={hasActive}
+              onClick={() => onRemove(book)}
+            >
+              Изъять
+            </Button>
+          </Box>
+        </Tooltip>
         {hasReserved.length > 0 && onCancelReservation && (
           <Button
             variant="subtle"

@@ -27,20 +27,34 @@ export function StatusBadge({ status, startDate, dueDate }: StatusBadgeProps) {
     );
   }
 
-  if (status === 'reserved' && startDate) {
-    const daysUntil = dayjs(startDate).diff(today, 'day');
+  if (status === 'reserved') {
+    if (startDate) {
+      const daysUntil = dayjs(startDate).diff(today, 'day');
+      return (
+        <Badge color="gold" variant="light" size="sm">
+          Начнётся через {daysUntil} дн.
+        </Badge>
+      );
+    }
     return (
       <Badge color="gold" variant="light" size="sm">
-        Начнётся через {daysUntil} дн.
+        Зарезервирована
       </Badge>
     );
   }
 
-  if (status === 'active' && dueDate) {
-    const daysLeft = dayjs(dueDate).diff(today, 'day');
+  if (status === 'active') {
+    if (dueDate) {
+      const daysLeft = dayjs(dueDate).diff(today, 'day');
+      return (
+        <Badge color="bordeaux" variant="light" size="sm">
+          Осталось {daysLeft} дн.
+        </Badge>
+      );
+    }
     return (
       <Badge color="bordeaux" variant="light" size="sm">
-        Осталось {daysLeft} дн.
+        На руках
       </Badge>
     );
   }
@@ -78,6 +92,14 @@ export function BookStatusBadge({ isAvailable, activeDueDate, reservedStartDate 
     parts.push(
       <Badge key="reserved" color="gold" variant="light" size="sm">
         Зарезервирована с {dayjs(reservedStartDate).format('DD.MM')}
+      </Badge>
+    );
+  }
+
+  if (parts.length === 0) {
+    return (
+      <Badge color="gray" variant="light" size="sm">
+        Недоступна
       </Badge>
     );
   }

@@ -2,14 +2,24 @@
   box-sizing: border-box;
 }
 
+html {
+  /* Плавная прокрутка для всего приложения */
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   padding: 0;
+  min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #F5EFE3;
-  color: #2E2418;
+  background-color: #F5EFE3; /* theme.other.bg */
+  color: #2E2418; /* theme.other.ink */
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, .mantine-Title-root {
   font-family: 'PT Serif', Georgia, serif;
+  margin-top: 0; 
 }

@@ -8,15 +8,12 @@ import {
   Text,
   Box,
   Divider,
+  useMantineTheme,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import type { Book } from '../../mock/data';
-import {
-  getPickupPointById,
-  getOccupiedDates,
-  currentUser,
-} from '../../mock/data';
+import { getPickupPointById, getOccupiedDates, currentUser } from '../../mock/data';
 
 interface ReserveModalProps {
   opened: boolean;
@@ -32,8 +29,10 @@ interface ReserveModalProps {
 }
 
 export function ReserveModal({ opened, onClose, book, onReserve }: ReserveModalProps) {
+  const theme = useMantineTheme();
+
   const [pickupPointId, setPickupPointId] = useState<string | null>(null);
-  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<string | null>(null);
   const [loanDays, setLoanDays] = useState<number>(7);
 
   const occupiedDates = useMemo(() => {
@@ -45,14 +44,20 @@ export function ReserveModal({ opened, onClose, book, onReserve }: ReserveModalP
     if (!book) return [];
     return book.pickup_point_ids.map((id) => {
       const point = getPickupPointById(id);
-      return { value: String(id), label: point?.name || '' };
+      return { value: String(id), label: point?.name || 'Неизвестная точка' };
     });
   }, [book]);
 
   const dueDate = useMemo(() => {
     if (!startDate) return null;
-    return dayjs(startDate).add(loanDays, 'day').toDate();
+    return dayjs(startDate).add(loanDays, 'day');
   }, [startDate, loanDays]);
+
+  const loanChips = useMemo(() => {
+    const max = book?.max_loan_days || 21;
+    const options = [7, 14, max];
+    return [...new Set(options)].sort((a, b) => a - b);
+  }, [book]);
 
   const handleReserve = () => {
     if (!book || !pickupPointId || !startDate) return;
@@ -60,15 +65,23 @@ export function ReserveModal({ opened, onClose, book, onReserve }: ReserveModalP
       book_id: book.id,
       borrower_id: currentUser.id,
       pickup_point_id: Number(pickupPointId),
-      start_date: dayjs(startDate).format('YYYY-MM-DD'),
+      start_date: startDate,
       due_date: dayjs(startDate).add(loanDays, 'day').format('YYYY-MM-DD'),
     });
     onClose();
   };
 
-  const loanChips = [7, 14, book?.max_loan_days || 21].filter(
-    (v, i, arr) => arr.indexOf(v) === i
-  );
+  const isDateDisabled = (date: string) => {
+    const isPast = dayjs(date).isBefore(dayjs(), 'day');
+    const isOccupied = occupiedDates.includes(date);
+    return isPast || isOccupied;
+  };
+
+  const parchmentBoxStyle = {
+    backgroundColor: theme.other.card,
+    borderRadius: theme.radius.sm,
+    border: `1px solid ${theme.other.border}`,
+  };
 
   if (!book) return null;
 
@@ -81,15 +94,8 @@ export function ReserveModal({ opened, onClose, book, onReserve }: ReserveModalP
       centered
     >
       <Stack gap="md">
-        <Box
-          p="sm"
-          style={{
-            backgroundColor: '#F5EFE3',
-            borderRadius: 6,
-            border: '1px solid #D9CDB4',
-          }}
-        >
-          <Text fw={700} style={{ fontFamily: '"PT Serif", Georgia, serif' }}>
+        <Box p="sm" style={parchmentBoxStyle}>
+          <Text fw={700} style={{ fontFamily: theme.headings.fontFamily }}>
             {book.title}
           </Text>
           <Text size="sm" c="dimmed">
@@ -99,7 +105,6 @@ export function ReserveModal({ opened, onClose, book, onReserve }: ReserveModalP
             Лимит владельца: до {book.max_loan_days} дней
           </Text>
         </Box>
-
         <Select
           label="Точка выдачи"
           placeholder="Выберите точку"
@@ -107,72 +112,61 @@ export function ReserveModal({ opened, onClose, book, onReserve }: ReserveModalP
           value={pickupPointId}
           onChange={setPickupPointId}
           required
+          nothingFoundMessage="Нет доступных точек"
         />
-
         <DatePickerInput
           label="Дата начала"
           placeholder="Выберите дату"
           value={startDate}
-          onChange={(date) => {
-            // date приходит как string | null, конвертируем в Date | null
-            setStartDate(date ? new Date(date) : null);
-          }}
+          onChange={setStartDate}
           minDate={new Date()}
-          excludeDate={(date) => occupiedDates.includes(dayjs(date).format('YYYY-MM-DD'))}
+          excludeDate={isDateDisabled}
           required
           clearable
+          valueFormat="YYYY-MM-DD"
         />
-
-        <Divider label="Срок" labelPosition="center" />
-
+        <Divider label="Срок аренды" labelPosition="center" color={theme.other.border} />
         <Box>
           <Text size="sm" mb="xs" fw={500}>
-            Срок (дней):
+            Выберите срок (дней):
           </Text>
           <Group gap="xs">
-            {loanChips.map((days) => (
-              <Button
-                key={days}
-                variant={loanDays === days ? 'filled' : 'outline'}
-                color="gold"
-                size="sm"
-                onClick={() => setLoanDays(days)}
-              >
-                {days} дн.
-              </Button>
-            ))}
+            {loanChips.map((days) => {
+              const isDisabled = days > book.max_loan_days;
+              return (
+                <Button
+                  key={days}
+                  variant={loanDays === days ? 'filled' : 'outline'}
+                  color="gold"
+                  size="sm"
+                  disabled={isDisabled}
+                  onClick={() => setLoanDays(days)}
+                >
+                  {days} дн.
+                </Button>
+              );
+            })}
           </Group>
-          <Text size="xs" c="dimmed" mt="xs">
-            Максимум: {book.max_loan_days} дней (правило владельца)
-          </Text>
         </Box>
-
         {startDate && dueDate && (
-          <Box
-            p="sm"
-            style={{
-              backgroundColor: '#F5EFE3',
-              borderRadius: 6,
-              border: '1px solid #D9CDB4',
-            }}
-          >
+          <Box p="sm" style={parchmentBoxStyle}>
             <Text size="sm">
               Вернуть до:{' '}
-              <strong>{dayjs(dueDate).format('DD.MM.YYYY')}</strong>
+              <strong style={{ color: theme.colors.gold[6] }}>
+                {dueDate.format('DD.MM.YYYY')}
+              </strong>
             </Text>
           </Box>
         )}
-
         <Group justify="flex-end" mt="md">
           <Button variant="subtle" color="gray" onClick={onClose}>
             Отмена
           </Button>
           <Button
-            color="gold"
             onClick={handleReserve}
             disabled={!pickupPointId || !startDate || loanDays > book.max_loan_days}
           >
-            Забронировать
+            Подтвердить бронь
           </Button>
         </Group>
       </Stack>

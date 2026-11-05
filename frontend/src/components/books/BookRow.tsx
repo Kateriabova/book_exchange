@@ -1,4 +1,4 @@
-import { Group, Text, Button, Box, Stack } from '@mantine/core';
+import { Group, Text, Button, Box, Stack, useMantineTheme } from '@mantine/core';
 import type { Book } from '../../mock/data';
 import {
   getUserById,
@@ -17,6 +17,7 @@ interface BookRowProps {
 }
 
 export function BookRow({ book, onReserve }: BookRowProps) {
+  const theme = useMantineTheme();
   const owner = getUserById(book.owner_id);
   const loansCount = getLoansCount(book.id);
   const maxCount = getMaxLoansCount();
@@ -32,14 +33,19 @@ export function BookRow({ book, onReserve }: BookRowProps) {
     <Box
       p="md"
       style={{
-        backgroundColor: '#FBF7EE',
-        border: '1px solid #D9CDB4',
-        borderRadius: 6,
+        backgroundColor: theme.other.card,
+        border: `1px solid ${theme.other.border}`,
+        borderRadius: theme.radius.sm,
+        transition: 'all 0.2s ease',
+        ':hover': {
+          borderColor: theme.colors.gold[6],
+          transform: 'translateX(4px)',
+        },
       }}
     >
       <Stack gap="sm">
         <Stack gap={4}>
-          <Text fw={700} size="lg" style={{ fontFamily: '"PT Serif", Georgia, serif' }}>
+          <Text fw={700} size="lg" style={{ fontFamily: theme.headings.fontFamily }}>
             {book.title}
           </Text>
           <Text c="dimmed" size="sm">

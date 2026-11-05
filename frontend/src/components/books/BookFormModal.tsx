@@ -8,8 +8,8 @@ import {
   Button,
   Group,
   Stack,
-  Text,
   Divider,
+  useMantineTheme,
 } from '@mantine/core';
 import type { Book } from '../../mock/data';
 import { GENRES, pickupPoints } from '../../mock/data';
@@ -22,6 +22,9 @@ interface BookFormModalProps {
 }
 
 export function BookFormModal({ opened, onClose, book, onSave }: BookFormModalProps) {
+  const theme = useMantineTheme();
+  const currentYear = new Date().getFullYear();
+
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [publisher, setPublisher] = useState('');
@@ -36,11 +39,11 @@ export function BookFormModal({ opened, onClose, book, onSave }: BookFormModalPr
     if (book) {
       setTitle(book.title);
       setAuthor(book.author);
-      setPublisher(book.publisher);
-      setYear(book.year);
-      setPages(book.pages);
-      setLanguage(book.language);
-      setGenre(book.genre);
+      setPublisher(book.publisher || '');
+      setYear(book.year || '');
+      setPages(book.pages || '');
+      setLanguage(book.language || '');
+      setGenre(book.genre || null);
       setMaxLoanDays(book.max_loan_days);
       setPickupPointIds(book.pickup_point_ids.map(String));
     } else {
@@ -64,7 +67,7 @@ export function BookFormModal({ opened, onClose, book, onSave }: BookFormModalPr
       title: title.trim(),
       author: author.trim(),
       publisher: publisher.trim(),
-      year: Number(year) || new Date().getFullYear(),
+      year: Number(year) || currentYear,
       pages: Number(pages) || 0,
       language: language.trim(),
       genre: genre || '',
@@ -74,8 +77,7 @@ export function BookFormModal({ opened, onClose, book, onSave }: BookFormModalPr
     onClose();
   };
 
-  const pointOptions = pickupPoints.map((p) => ({ value: String(p.id), label: p.name }));
-  const genreOptions = GENRES.map((g) => ({ value: g, label: g }));
+  const isInvalid = !title.trim() || !author.trim();
 
   return (
     <Modal
@@ -103,15 +105,18 @@ export function BookFormModal({ opened, onClose, book, onSave }: BookFormModalPr
         <Group grow>
           <TextInput
             label="Издательство"
-            placeholder="Издательство"
+            placeholder="Например: АСТ"
             value={publisher}
             onChange={(e) => setPublisher(e.currentTarget.value)}
           />
           <NumberInput
-            label="Год"
-            placeholder="2024"
+            label="Год издания"
+            placeholder={String(currentYear)}
             value={year}
             onChange={(v) => setYear(v as number)}
+            min={1800}
+            max={currentYear + 5}
+            allowNegative={false}
           />
         </Group>
         <Group grow>
@@ -120,6 +125,8 @@ export function BookFormModal({ opened, onClose, book, onSave }: BookFormModalPr
             placeholder="320"
             value={pages}
             onChange={(v) => setPages(v as number)}
+            min={1}
+            allowNegative={false}
           />
           <TextInput
             label="Язык"
@@ -131,43 +138,38 @@ export function BookFormModal({ opened, onClose, book, onSave }: BookFormModalPr
         <Select
           label="Жанр"
           placeholder="Выберите жанр"
-          data={genreOptions}
+          data={GENRES.map((g) => ({ value: g, label: g }))}
           value={genre}
           onChange={setGenre}
           clearable
         />
-
-        <Divider label="Правила выдачи (владелец)" labelPosition="center" />
-
+        <Divider
+          label="Правила выдачи (владелец)"
+          labelPosition="center"
+          color={theme.other.border}
+        />
         <NumberInput
-          label="Максимальный срок (дни)"
+          label="Максимальный срок выдачи (дни)"
           value={maxLoanDays}
           onChange={(v) => setMaxLoanDays(v as number)}
           min={1}
-          max={60}
+          max={90}
+          description="Применяется только к новым броням"
         />
         <MultiSelect
-          label="Точки выдачи"
+          label="Доступные точки выдачи"
           placeholder="Выберите точки"
-          data={pointOptions}
+          data={pickupPoints.map((p) => ({ value: String(p.id), label: p.name }))}
           value={pickupPointIds}
           onChange={setPickupPointIds}
+          searchable
         />
-
-        <Text size="xs" c="dimmed">
-          Эти правила применяются к новым броням. Существующие брони не изменяются.
-        </Text>
-
         <Group justify="flex-end" mt="md">
           <Button variant="subtle" color="gray" onClick={onClose}>
             Отмена
           </Button>
-          <Button
-            color="gold"
-            onClick={handleSave}
-            disabled={!title.trim() || !author.trim()}
-          >
-            {book ? 'Сохранить' : 'Добавить'}
+          <Button onClick={handleSave} disabled={isInvalid}>
+            {book ? 'Сохранить изменения' : 'Добавить книгу'}
           </Button>
         </Group>
       </Stack>

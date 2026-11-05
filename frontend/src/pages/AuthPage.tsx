@@ -10,34 +10,54 @@ import {
   Stack,
   Paper,
   Center,
+  useMantineTheme,
+  Loader,
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
 
 export function AuthPage() {
+  const theme = useMantineTheme();
   const navigate = useNavigate();
+  
   const [tab, setTab] = useState<string | null>('login');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = () => {
-    // Демо: любой логин/пароль подходит
-    if (tab === 'login') {
-      if (login && password) {
-        navigate('/catalog');
-      }
-    } else {
-      if (login && password && password === passwordConfirm) {
-        navigate('/catalog');
-      }
+    if (tab === 'register' && password !== passwordConfirm) {
+      notifications.show({
+        title: 'Ошибка валидации',
+        message: 'Пароли не совпадают',
+        color: 'bordeaux',
+      });
+      return;
     }
+
+    setIsLoading(true);
+
+    // Имитация задержки сети (как при реальном запросе на бэкенд)
+    setTimeout(() => {
+      setIsLoading(false);
+      notifications.show({
+        title: 'Успех',
+        message: tab === 'login' ? 'Добро пожаловать в библиотеку!' : 'Регистрация прошла успешно',
+        color: 'sage',
+      });
+      navigate('/catalog');
+    }, 600);
   };
+
+  const isLoginDisabled = !login.trim() || !password.trim() || isLoading;
+  const isRegisterDisabled = !login.trim() || !password.trim() || !passwordConfirm.trim() || isLoading;
 
   return (
     <Center
       style={{
         minHeight: '100vh',
-        backgroundColor: '#F5EFE3',
+        backgroundColor: theme.other.bg,
       }}
     >
       <Paper
@@ -47,8 +67,8 @@ export function AuthPage() {
         style={{
           width: '100%',
           maxWidth: 420,
-          backgroundColor: '#FBF7EE',
-          borderColor: '#D9CDB4',
+          backgroundColor: theme.other.card,
+          borderColor: theme.other.border,
         }}
       >
         <Stack gap="md">
@@ -56,8 +76,8 @@ export function AuthPage() {
             <Title
               order={2}
               style={{
-                fontFamily: '"PT Serif", Georgia, serif',
-                color: '#2E2418',
+                fontFamily: theme.headings.fontFamily,
+                color: theme.other.ink,
               }}
             >
               Сервис обмена книгами
@@ -80,21 +100,26 @@ export function AuthPage() {
                   placeholder="Введите логин"
                   value={login}
                   onChange={(e) => setLogin(e.currentTarget.value)}
+                  withAsterisk
+                  disabled={isLoading}
                 />
                 <PasswordInput
                   label="Пароль"
                   placeholder="Введите пароль"
                   value={password}
                   onChange={(e) => setPassword(e.currentTarget.value)}
+                  withAsterisk
+                  disabled={isLoading}
                 />
                 <Button
                   color="gold"
                   fullWidth
                   mt="md"
                   onClick={handleSubmit}
-                  disabled={!login || !password}
+                  disabled={isLoginDisabled}
+                  leftSection={isLoading ? <Loader size="xs" color="white" /> : null}
                 >
-                  Войти в библиотеку
+                  {isLoading ? 'Вход...' : 'Войти в библиотеку'}
                 </Button>
               </Stack>
             </Tabs.Panel>
@@ -106,27 +131,39 @@ export function AuthPage() {
                   placeholder="Придумайте логин"
                   value={login}
                   onChange={(e) => setLogin(e.currentTarget.value)}
+                  withAsterisk
+                  disabled={isLoading}
                 />
                 <PasswordInput
                   label="Пароль"
                   placeholder="Придумайте пароль"
                   value={password}
                   onChange={(e) => setPassword(e.currentTarget.value)}
+                  withAsterisk
+                  disabled={isLoading}
                 />
                 <PasswordInput
                   label="Пароль ещё раз"
                   placeholder="Повторите пароль"
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.currentTarget.value)}
+                  withAsterisk
+                  disabled={isLoading}
+                  error={
+                    passwordConfirm && password !== passwordConfirm
+                      ? 'Пароли не совпадают'
+                      : undefined
+                  }
                 />
                 <Button
                   color="gold"
                   fullWidth
                   mt="md"
                   onClick={handleSubmit}
-                  disabled={!login || !password || password !== passwordConfirm}
+                  disabled={isRegisterDisabled}
+                  leftSection={isLoading ? <Loader size="xs" color="white" /> : null}
                 >
-                  Зарегистрироваться
+                  {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
                 </Button>
               </Stack>
             </Tabs.Panel>

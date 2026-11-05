@@ -1,11 +1,6 @@
-import {
-  Table,
-  Group,
-  Button,
-  Text,
-  Box,
-  Tabs,
-} from '@mantine/core';
+import { Table, Group, Button, Text, Box, useMantineTheme, Tooltip } from '@mantine/core';
+import { IconCalendar, IconUser, IconMapPin, IconX, IconCheck } from '@tabler/icons-react';
+import dayjs from 'dayjs';
 import type { Reservation } from '../../mock/data';
 import {
   getBookById,
@@ -22,41 +17,59 @@ interface ReservationsTableProps {
 }
 
 export function ReservationsTable({ reservations, onCancel, onReturn }: ReservationsTableProps) {
-  const active = reservations.filter(
-    (r) => r.status === 'active' || r.status === 'reserved'
-  );
-  const history = reservations.filter(
-    (r) => r.status === 'returned' || r.status === 'cancelled'
-  );
+  const theme = useMantineTheme();
 
-  const renderRow = (r: Reservation, isHistory: boolean) => {
+  const renderRow = (r: Reservation) => {
     const book = getBookById(r.book_id);
     const owner = getUserById(book?.owner_id || 0);
     const point = getPickupPointById(r.pickup_point_id);
     const isMine = r.borrower_id === currentUser.id;
+    const isHistory = r.status === 'returned' || r.status === 'cancelled';
+
+    const daysLeft = dayjs(r.due_date).diff(dayjs(), 'day');
+    const daysUntilStart = dayjs(r.start_date).diff(dayjs(), 'day');
 
     return (
       <Table.Tr
         key={r.id}
-        style={{ opacity: isHistory ? 0.6 : 1 }}
+        style={{ 
+          opacity: isHistory ? 0.6 : 1,
+          transition: 'background-color 0.15s ease',
+        }}
       >
         <Table.Td>
           <Text size="sm" fw={500}>
             {book?.title}
           </Text>
+          {owner && (
+            <Text size="xs" c="dimmed">
+              {owner.display_name}
+            </Text>
+          )}
         </Table.Td>
         <Table.Td>
-          <Text size="sm" c="dimmed">
-            {owner?.display_name}
-          </Text>
+          <Group gap={4}>
+            <IconMapPin size={14} color={theme.colors.gray[6]} />
+            <Text size="sm">{point?.name}</Text>
+          </Group>
         </Table.Td>
         <Table.Td>
-          <Text size="sm">{point?.name}</Text>
-        </Table.Td>
-        <Table.Td>
-          <Text size="xs">
-            {r.start_date} — {r.due_date}
-          </Text>
+          <Group gap={4}>
+            <IconCalendar size={14} color={theme.colors.gray[6]} />
+            <Text size="xs">
+              {dayjs(r.start_date).format('DD.MM')} — {dayjs(r.due_date).format('DD.MM.YYYY')}
+            </Text>
+          </Group>
+          {!isHistory && r.status === 'reserved' && daysUntilStart > 0 && (
+            <Text size="xs" c="gold" mt={2}>
+              Начнётся через {daysUntilStart} дн.
+            </Text>
+          )}
+          {!isHistory && r.status === 'active' && daysLeft > 0 && (
+            <Text size="xs" c="bordeaux" mt={2}>
+              Осталось {daysLeft} дн.
+            </Text>
+          )}
         </Table.Td>
         <Table.Td>
           <StatusBadge
@@ -69,24 +82,30 @@ export function ReservationsTable({ reservations, onCancel, onReturn }: Reservat
           {isMine && !isHistory && (
             <Group gap="xs">
               {r.status === 'reserved' && (
-                <Button
-                  variant="subtle"
-                  color="bordeaux"
-                  size="xs"
-                  onClick={() => onCancel(r.id)}
-                >
-                  Отменить
-                </Button>
+                <Tooltip label="Отменить бронь" withArrow>
+                  <Button
+                    variant="subtle"
+                    color="bordeaux"
+                    size="xs"
+                    leftSection={<IconX size={14} />}
+                    onClick={() => onCancel(r.id)}
+                  >
+                    Отменить
+                  </Button>
+                </Tooltip>
               )}
               {r.status === 'active' && (
-                <Button
-                  variant="light"
-                  color="sage"
-                  size="xs"
-                  onClick={() => onReturn(r.id)}
-                >
-                  Вернуть
-                </Button>
+                <Tooltip label="Подтвердить возврат" withArrow>
+                  <Button
+                    variant="light"
+                    color="sage"
+                    size="xs"
+                    leftSection={<IconCheck size={14} />}
+                    onClick={() => onReturn(r.id)}
+                  >
+                    Вернуть
+                  </Button>
+                </Tooltip>
               )}
             </Group>
           )}
@@ -95,60 +114,26 @@ export function ReservationsTable({ reservations, onCancel, onReturn }: Reservat
     );
   };
 
+  if (reservations.length === 0) {
+    return (
+      <Box p="xl" ta="center">
+        <Text c="dimmed">Нет данных для отображения</Text>
+      </Box>
+    );
+  }
+
   return (
-    <Tabs defaultValue="active" color="gold">
-      <Tabs.List>
-        <Tabs.Tab value="active">Активные ({active.length})</Tabs.Tab>
-        <Tabs.Tab value="history">История ({history.length})</Tabs.Tab>
-      </Tabs.List>
-
-      <Tabs.Panel value="active" pt="md">
-        {active.length === 0 ? (
-          <Box p="xl" ta="center">
-            <Text c="dimmed">Нет активных броней</Text>
-          </Box>
-        ) : (
-          <Table striped highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Книга</Table.Th>
-                <Table.Th>Владелец</Table.Th>
-                <Table.Th>Точка</Table.Th>
-                <Table.Th>Период</Table.Th>
-                <Table.Th>Статус</Table.Th>
-                <Table.Th>Действия</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {active.map((r) => renderRow(r, false))}
-            </Table.Tbody>
-          </Table>
-        )}
-      </Tabs.Panel>
-
-      <Tabs.Panel value="history" pt="md">
-        {history.length === 0 ? (
-          <Box p="xl" ta="center">
-            <Text c="dimmed">История пуста</Text>
-          </Box>
-        ) : (
-          <Table striped>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Книга</Table.Th>
-                <Table.Th>Владелец</Table.Th>
-                <Table.Th>Точка</Table.Th>
-                <Table.Th>Период</Table.Th>
-                <Table.Th>Статус</Table.Th>
-                <Table.Th></Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {history.map((r) => renderRow(r, true))}
-            </Table.Tbody>
-          </Table>
-        )}
-      </Tabs.Panel>
-    </Tabs>
+    <Table striped highlightOnHover verticalSpacing="sm">
+      <Table.Thead>
+        <Table.Tr>
+          <Table.Th>Книга</Table.Th>
+          <Table.Th>Точка выдачи</Table.Th>
+          <Table.Th>Период</Table.Th>
+          <Table.Th>Статус</Table.Th>
+          <Table.Th>Действия</Table.Th>
+        </Table.Tr>
+      </Table.Thead>
+      <Table.Tbody>{reservations.map(renderRow)}</Table.Tbody>
+    </Table>
   );
 }
